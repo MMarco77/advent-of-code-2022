@@ -8,7 +8,9 @@ use std::{
     process,
 };
 
-const MODULE_TEMPLATE: &str = r###"pub fn part_one(input: &str) -> Option<u32> {
+const MODULE_TEMPLATE: &str = r###"use advent_of_code::error::AppResult;
+
+pub fn part_one(input: &str) -> Option<u32> {
     None
 }
 
