@@ -18,34 +18,21 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let mut biggest: [u32; 3] = [0; 3];
+    let mut biggest: Vec<u32> = Vec::new();
     let mut last_count = input.lines().fold(0, |acc, line| -> u32 {
         if line.is_empty() {
-            let mut acc_bis = acc;
-            if acc_bis > biggest[2] {
-                std::mem::swap(&mut biggest[2], &mut acc_bis);
-            }
-            if acc_bis > biggest[1] {
-                std::mem::swap(&mut biggest[1], &mut acc_bis);
-            }
-            if acc_bis > biggest[0] {
-                biggest[0] = acc_bis;
-            }
+            biggest.push(acc);
+            biggest.sort_by(|a, b| b.cmp(a));
+            biggest.resize(3, 0);
             0
         } else {
             acc + line.parse::<u32>().unwrap()
         }
     });
 
-    if last_count > biggest[2] {
-        std::mem::swap(&mut biggest[2], &mut last_count);
-    }
-    if last_count > biggest[1] {
-        std::mem::swap(&mut biggest[1], &mut last_count);
-    }
-    if last_count > biggest[0] {
-        biggest[0] = last_count;
-    }
+    biggest.push(last_count);
+    biggest.sort_by(|a, b| b.cmp(a));
+    biggest.resize(3, 0);
 
     Some(biggest.iter().sum())
 }
@@ -67,8 +54,20 @@ mod tests {
     }
 
     #[test]
+    fn test_part_one_offical() {
+        let input = advent_of_code::read_file("inputs", 1);
+        assert_eq!(part_one(&input), Some(68787));
+    }
+
+    #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 1);
         assert_eq!(part_two(&input), Some(45000));
+    }
+
+    #[test]
+    fn test_part_two_offical() {
+        let input = advent_of_code::read_file("inputs", 1);
+        assert_eq!(part_two(&input), Some(198041));
     }
 }
