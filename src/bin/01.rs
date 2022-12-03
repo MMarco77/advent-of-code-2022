@@ -54,6 +54,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn test_part_one_offical() {
         let input = advent_of_code::read_file("inputs", 1);
         assert_eq!(part_one(&input), Some(68787));
@@ -66,7 +67,8 @@ mod tests {
     }
 
     #[test]
-    fn test_part_two_offical() {
+    #[ignore]
+    fn test_part_two_official() {
         let input = advent_of_code::read_file("inputs", 1);
         assert_eq!(part_two(&input), Some(198041));
     }
