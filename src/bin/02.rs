@@ -24,7 +24,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let score: HashMap<String, u32> = HashMap::from_iter([
         ("A".to_owned(), 1),
         ("B".to_owned(), 2),
-        ("C".to_owned(), 3)
+        ("C".to_owned(), 3),
     ]);
     Some(input.lines().fold(0, |acc, line| {
         if let Some((dl, dr)) = eyes::try_parse!(line, "{} {}", String, String) {
@@ -64,8 +64,20 @@ mod tests {
     }
 
     #[test]
+    fn test_input_part_one() {
+        let input = advent_of_code::read_file("inputs", 2);
+        assert_eq!(part_one(&input), Some(13009));
+    }
+
+    #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 2);
         assert_eq!(part_two(&input), Some(12));
+    }
+
+    #[test]
+    fn test_inputs_part_two() {
+        let input = advent_of_code::read_file("inputs", 2);
+        assert_eq!(part_two(&input), Some(10398));
     }
 }
