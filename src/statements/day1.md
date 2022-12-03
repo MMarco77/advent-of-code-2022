@@ -1,4 +1,20 @@
---- Day 1: Calorie Counting ---
+```
+ ____                _   
+|  _ \  __ _ _   _  / |_ 
+| | | |/ _` | | | | | (_)
+| |_| | (_| | |_| | | |_ 
+|____/ \__,_|\__, | |_(_)
+             |___/       
+
+  ____      _            _         ____                  _   _             
+ / ___|__ _| | ___  _ __(_) ___   / ___|___  _   _ _ __ | |_(_)_ __   __ _ 
+| |   / _` | |/ _ \| '__| |/ _ \ | |   / _ \| | | | '_ \| __| | '_ \ / _` |
+| |__| (_| | | (_) | |  | |  __/ | |__| (_) | |_| | | | | |_| | | | | (_| |
+ \____\__,_|_|\___/|_|  |_|\___|  \____\___/ \__,_|_| |_|\__|_|_| |_|\__, |
+                                                                     |___/ 
+```
+
+# Part One
 
 Santa's reindeer typically eat regular reindeer food, but they need a lot of magical energy to deliver presents on Christmas. For that, their favorite snack is a special type of star fruit that only grows deep in the jungle. The Elves have brought you on their annual expedition to the grove where the fruit grows.
 
@@ -12,6 +28,7 @@ The Elves take turns writing down the number of Calories contained by the variou
 
 For example, suppose the Elves finish writing their items' Calories and end up with the following list:
 
+```
 1000
 2000
 3000
@@ -26,6 +43,7 @@ For example, suppose the Elves finish writing their items' Calories and end up w
 9000
 
 10000
+```
 
 This list represents the Calories of the food carried by five Elves:
 
@@ -43,7 +61,7 @@ Your puzzle answer was 68787.
 
 The first half of this puzzle is complete! It provides one gold star: *
 
---- Part Two ---
+# Part Two
 
 By the time you calculate the answer to the Elves' question, they've already realized that the Elf carrying the most Calories of food might eventually run out of snacks.
 

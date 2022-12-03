@@ -19,7 +19,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let mut biggest: Vec<u32> = Vec::new();
-    let mut last_count = input.lines().fold(0, |acc, line| -> u32 {
+    let last_count = input.lines().fold(0, |acc, line| -> u32 {
         if line.is_empty() {
             biggest.push(acc);
             biggest.sort_by(|a, b| b.cmp(a));
