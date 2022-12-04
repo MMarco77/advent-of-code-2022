@@ -6,6 +6,8 @@
 use std::env;
 use std::fs;
 
+extern crate lazy_static;
+
 pub mod error;
 pub mod helpers;
 

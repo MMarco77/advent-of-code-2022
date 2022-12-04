@@ -7,6 +7,7 @@ name = "advent_of_code"
 version = "0.8.0"
 dependencies = [
  "eyes",
+ "lazy_static",
  "pico-args",
 ]
 
@@ -15,6 +16,12 @@ name = "eyes"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20c46942b268eef9b50b6766c146e8a4903e5e51c4236d321af6c8069ef9a60b"
+
+[[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "pico-args"
