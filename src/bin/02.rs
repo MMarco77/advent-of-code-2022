@@ -30,7 +30,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         if let Some((dl, dr)) = eyes::try_parse!(line, "{} {}", String, String) {
             match (dl.as_str(), dr.as_str()) {
                 // Null
-                ("A", "Y") | ("B", "Y") | ("C", "Y") => acc + 3 + score.get(&dl).unwrap(),
+                (_, "Y") => acc + 3 + score.get(&dl).unwrap(),
                 // Lost
                 ("A", "X") => acc + score.get("C").unwrap(),
                 ("B", "X") => acc + score.get("A").unwrap(),
