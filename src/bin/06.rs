@@ -1,10 +1,29 @@
 use std::collections::HashSet;
 
-fn get_uniq_chunk_index(line: &str, chunk_size: usize) -> Option<u32>{
-    for (count, chunk) in line.chars().collect::<Vec<char>>().windows(chunk_size).enumerate() {
+/*
+(Debug)
+🎄 Part 1 🎄
+1707 (elapsed: 2.42ms)
+🎄 Part 2 🎄
+3697 (elapsed: 13.68ms)
+
+(Release)
+🎄 Part 1 🎄
+1707 (elapsed: 94.34µs)
+🎄 Part 2 🎄
+3697 (elapsed: 627.79µs)
+ */
+
+fn get_uniq_chunk_index(line: &str, chunk_size: usize) -> Option<u32> {
+    for (count, chunk) in line
+        .chars()
+        .collect::<Vec<char>>()
+        .windows(chunk_size)
+        .enumerate()
+    {
         let chunk_set: HashSet<char> = HashSet::from_iter(chunk.iter().cloned());
         if chunk_set.len() == chunk_size {
-            return Some(count as u32 + chunk_size as u32)
+            return Some(count as u32 + chunk_size as u32);
         }
     }
     None
@@ -79,5 +98,4 @@ mod tests {
             }
         }
     }
-    
 }

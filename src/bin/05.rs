@@ -1,3 +1,17 @@
+/*
+(Debug)
+🎄 Part 1 🎄
+TPGVQPFDH (elapsed: 1.34ms)
+🎄 Part 2 🎄
+DMRDFRHHH (elapsed: 1.39ms)
+
+(Release)
+🎄 Part 1 🎄
+TPGVQPFDH (elapsed: 150.45µs)
+🎄 Part 2 🎄
+DMRDFRHHH (elapsed: 156.95µs)
+*/
+
 use std::str::Lines;
 
 use advent_of_code::error::{AppError, AppResult};
