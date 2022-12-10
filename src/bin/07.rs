@@ -135,7 +135,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     // Folder stat
     let mut statistic: Vec<u64> = Vec::new();
     root.stat_size(&mut statistic);
-    let size_list = statistic.iter().map(|s| *s).collect::<Vec<u64>>();
+    let size_list = statistic.to_vec();
 
     let total_space = 70_000_000;
     let used_space = size_list.iter().max().unwrap();
