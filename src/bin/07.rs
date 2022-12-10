@@ -1,7 +1,15 @@
 /*
 (Debug)
+🎄 Part 1 🎄
+1443806 (elapsed: 1.10ms)
+🎄 Part 2 🎄
+942298 (elapsed: 1.07ms)
 
 (Release)
+🎄 Part 1 🎄
+1443806 (elapsed: 134.22µs)
+🎄 Part 2 🎄
+942298 (elapsed: 112.21µs)
  */
 
 use advent_of_code::error::AppResult;
@@ -9,7 +17,7 @@ use advent_of_code::error::AppResult;
 trait Component {
     fn size(&self) -> u64;
     // HashMap => 773836; Vec => 939466
-    fn stat_size(&self, statistic: &mut Vec<(String, u64)>);
+    fn stat_size(&self, statistic: &mut Vec<u64>);
     fn pretty_print(&self, shift: &str);
 }
 
@@ -33,7 +41,7 @@ impl Component for File {
         self.size
     }
 
-    fn stat_size(&self, _: &mut Vec<(String, u64)>) {}
+    fn stat_size(&self, _: &mut Vec<u64>) {}
 
     fn pretty_print(&self, shift: &str) {
         println!("{} - {} (file, size={})", shift, self.name, self.size);
@@ -63,8 +71,8 @@ impl Component for Folder {
         self.components.iter().fold(0, |acc, cmp| acc + cmp.size())
     }
 
-    fn stat_size(&self, statistic: &mut Vec<(String, u64)>) {
-        statistic.push((self.name.clone(), self.size()));
+    fn stat_size(&self, statistic: &mut Vec<u64>) {
+        statistic.push(self.size());
         for component in self.components.iter() {
             component.stat_size(statistic);
         }
@@ -109,29 +117,26 @@ pub fn part_one(input: &str) -> Option<u64> {
     populate(&mut root, &mut line_iter).expect("Failed to create root");
 
     // Compute soluce
-    let mut statistic: Vec<(String, u64)> = Vec::new();
+    let mut statistic: Vec<u64> = Vec::new();
     root.stat_size(&mut statistic);
     //root.pretty_print("");
     let size_list = statistic
         .iter()
-        .filter_map(|(_, s)| if *s <= 100_000 { Some(*s) } else { None })
+        .filter_map(|s| if *s <= 100_000 { Some(*s) } else { None })
         .collect::<Vec<u64>>();
     Some(size_list.iter().sum())
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-   let mut root = Folder::new("/");
+    let mut root = Folder::new("/");
     let mut line_iter = input.lines().skip(2);
     populate(&mut root, &mut line_iter).expect("Failed to create root");
 
     // Folder stat
-    let mut statistic: Vec<(String, u64)> = Vec::new();
+    let mut statistic: Vec<u64> = Vec::new();
     root.stat_size(&mut statistic);
-    let size_list = statistic
-        .iter()
-        .map(|(_, s)| *s)
-        .collect::<Vec<u64>>();
-   
+    let size_list = statistic.to_vec();
+
     let total_space = 70_000_000;
     let used_space = size_list.iter().max().unwrap();
     let unused_space = total_space - used_space;
@@ -141,7 +146,8 @@ pub fn part_two(input: &str) -> Option<u64> {
     size_list
         .iter()
         .filter(|&size| size >= &amount_to_free)
-        .min().copied()
+        .min()
+        .copied()
 }
 
 fn main() {
@@ -161,8 +167,22 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
+    fn test_part_one_input() {
+        let input = advent_of_code::read_file("inputs", 7);
+        assert_eq!(part_one(&input), Some(1443806));
+    }
+
+    #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 7);
         assert_eq!(part_two(&input), Some(24933642));
+    }
+
+    #[test]
+    #[ignore]
+    fn test_part_two_input() {
+        let input = advent_of_code::read_file("examples", 7);
+        assert_eq!(part_two(&input), Some(942298));
     }
 }
