@@ -22,14 +22,31 @@ struct CpuState {
     clock: u32,
     rex_x: i32,
     strengh_tic: Vec<u32>,
+    crt: Vec<char>
 }
 
 impl CpuState {
     pub fn new(strengh_tic: &[u32]) -> Self {
-        CpuState { clock: 0, rex_x: 1, strengh_tic: strengh_tic.to_vec() }
+        CpuState { clock: 0, rex_x: 1, strengh_tic: strengh_tic.to_vec(), crt: Vec::new() }
     }
+    pub fn tic(&mut self, tic_count: u32) {
+        self.clock += tic_count;
+        let range = self.rex_x..self.rex_x+2;
+        let pixel = if range.contains(&(self.clock as i32)) {
+            '#'
+        } else {
+            '.'
+        };
+        self.crt.push(pixel);
+    }
+
+    pub fn draw_crt(&self) {
+        // println!{"{:#?}", self.crt};
+        self.crt.iter().for_each(|v| print!("{}", v));
+    }
+
     pub fn update_clock(&mut self, cmd: OpCode) -> AppResult<i32> {
-        self.clock += 1;
+        self.tic(1);
         match cmd {
             OpCode::Noop => {                 
                 if self.strengh_tic.contains(&self.clock) {
@@ -42,7 +59,7 @@ impl CpuState {
                 // Update tic and reg
                 let mut strengh_value = 0_i32;
                 for tic in 0..2 {
-                    self.clock += tic;
+                    self.tic(tic);
 
                     // Compute strenght
                     if self.strengh_tic.contains(&self.clock) {
@@ -51,7 +68,7 @@ impl CpuState {
 
                     if tic == 1 {
                         self.rex_x += shift;
-                        }
+                    }
                 }
                 Ok(strengh_value)
             },
@@ -66,8 +83,13 @@ pub fn part_one(input: &str) -> Option<i32> {
          .fold(0, |acc, cmd| acc + cpu.update_clock(cmd).expect("Invalid command")))
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    None
+pub fn part_two(input: &str) -> Option<i32> {
+    let mut cpu = CpuState::new(&[20, 60, 100, 140, 180, 220]);
+    let res = Some(input.lines()
+         .map(OpCode::from)
+         .fold(0, |acc, cmd| acc + cpu.update_clock(cmd).expect("Invalid command")));
+    cpu.draw_crt();
+    res
 }
 
 fn main() {
@@ -89,6 +111,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 10);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(13140));
     }
 }
