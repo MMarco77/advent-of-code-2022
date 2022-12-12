@@ -127,11 +127,8 @@ impl CpuState {
     }
 
     fn display_screen(&self) {
-        match &self.crt {
-            Some(crt) => { 
-                println!("{}", crt.screen);
-            }
-            _ => (),
+        if let Some(crt) = &self.crt {
+            println!("{}", crt.screen);
         }
     }
 }
