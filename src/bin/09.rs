@@ -1,4 +1,5 @@
 /*
+// Clone
 (Release)
 🎄 Part 1 🎄
 5960 (elapsed: 3.05ms)
@@ -9,6 +10,30 @@
 5960 (elapsed: 8.74ms)
 🎄 Part 2 🎄
 2327 (elapsed: 18.83ms)
+
+// HashSet
+(Release)
+🎄 Part 1 🎄
+5960 (elapsed: 1.21ms)
+🎄 Part 2 🎄
+2149 (elapsed: 2.17ms)
+(Debug)
+🎄 Part 1 🎄
+5960 (elapsed: 8.64ms)
+🎄 Part 2 🎄
+2149 (elapsed: 10.35ms
+
+// Vec
+(Release)
+🎄 Part 1 🎄
+5960 (elapsed: 556.11µs)
+🎄 Part 2 🎄
+2149 (elapsed: 704.98µs)
+(Debug)
+🎄 Part 1 🎄
+5960 (elapsed: 7.61ms)
+🎄 Part 2 🎄
+2149 (elapsed: 10.06ms)
 */
 
 use std::collections::HashSet;
@@ -22,7 +47,7 @@ struct Pos {
 struct Rope {
     head: Pos,
     tail_list: Vec<Pos>,
-    historic: HashSet<Pos>,
+    historic: Vec<Pos>,
 }
 
 impl Rope {
@@ -30,76 +55,55 @@ impl Rope {
         Rope {
             head: Pos { row: 0, col: 0 },
             tail_list: vec![Pos { row: 0, col: 0 }; count],
-            historic: HashSet::from_iter([Pos { row: 0, col: 0 }]),
+            historic: vec![Pos { row: 0, col: 0 }],
         }
     }
 
-    fn update(&mut self, head: &Pos, tail: &Pos) -> Pos {
-        let mut new_tail = tail.clone();
+    fn update(head: &Pos, tail: &mut Pos) {
         if !(head.col.abs_diff(tail.col) <= 1 && head.row.abs_diff(tail.row) <= 1) {
             // Move
-            match (head.col.abs_diff(new_tail.col), head.row.abs_diff(new_tail.row)) {
+            match (head.col.abs_diff(tail.col), head.row.abs_diff(tail.row)) {
                 // Diag
                 (2, 2) | (1, 2) | (2, 1) => {
-                    if head.col > new_tail.col {
-                        new_tail.col += 1;
+                    if head.col > tail.col {
+                        tail.col += 1;
                     } else {
-                        new_tail.col -= 1;
+                        tail.col -= 1;
                     }
-                    if head.row > new_tail.row {
-                        new_tail.row += 1;
+                    if head.row > tail.row {
+                        tail.row += 1;
                     } else {
-                        new_tail.row -= 1;
+                        tail.row -= 1;
                     }
                 }
-                (0, 2) if head.row > new_tail.row => {
-                    new_tail.row += 1;
+                (0, 2) if head.row > tail.row => {
+                    tail.row += 1;
                 }
-                (0, 2) if head.row < new_tail.row => {
-                    new_tail.row -= 1;
+                (0, 2) if head.row < tail.row => {
+                    tail.row -= 1;
                 }
                 (0, 2) => {}
-                (2, 0) if head.col > new_tail.col => {
-                    new_tail.col += 1;
+                (2, 0) if head.col > tail.col => {
+                    tail.col += 1;
                 }
-                (2, 0) if head.col < new_tail.col => {
-                    new_tail.col -= 1;
+                (2, 0) if head.col < tail.col => {
+                    tail.col -= 1;
                 }
                 _ => unreachable!(),
             };
         }
-        new_tail
     }
 
     fn update_tail(&mut self) {
-        // let cur_head = self.head;
-        // while let Some(cur_tail) = self.tail_list.iter().next() {
-        //     self.update(&cur_head, &mut cur_tail);
-        //     self.historic.insert(cur_tail.clone());
-        //     cur_head = cur_tail;
-        // }
-        let new_tails: Vec<Pos> = self.tail_list.clone().iter().fold(Vec::new(), |acc, tail| {
-            let head = if acc.is_empty() {
-                self.head.clone()
-            } else {
-                acc.iter().last().expect("Faild to collect las pos").clone()
-            };
-
-            // Compute new pos
-            let mut new_acc = acc;
-            new_acc.push(
-                self.update(
-                    &head, 
-                    tail
-                ));
-                new_acc
-        });
-
-        // Update historic
-        self.historic.insert(new_tails.iter().last().unwrap().clone());
+        let mut cur_head = &self.head;
+        for cur_tail in self.tail_list.iter_mut() {
+            Self::update(cur_head, cur_tail);
+            cur_head = cur_tail;
+        }
         
-        // Update new _tail
-        self.tail_list = new_tails;
+        
+        self.historic
+            .push(self.tail_list.iter().last().unwrap().clone());
     }
 
     pub fn move_up(&mut self, step: u8) {
@@ -140,7 +144,9 @@ pub fn part_one(input: &str) -> Option<u32> {
     input
         .lines()
         .enumerate()
-        .map(|(c, l)| eyes::try_parse!(l, "{} {}", String, u8).unwrap_or_else(|| panic!("Invalid line {c}")))
+        .map(|(c, l)| {
+            eyes::try_parse!(l, "{} {}", String, u8).unwrap_or_else(|| panic!("Invalid line {c}"))
+        })
         .for_each(|(cmd, step)| match cmd.chars().next() {
             Some('R') => rope.move_right(step),
             Some('U') => rope.move_up(step),
@@ -149,7 +155,8 @@ pub fn part_one(input: &str) -> Option<u32> {
             _ => unreachable!(),
         });
 
-    Some(rope.historic.len() as u32)
+        let uniq_pos: HashSet<Pos> = HashSet::from_iter(rope.historic);
+        Some(uniq_pos.len() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -157,7 +164,9 @@ pub fn part_two(input: &str) -> Option<u32> {
     input
         .lines()
         .enumerate()
-        .map(|(c, l)| eyes::try_parse!(l, "{} {}", String, u8).unwrap_or_else(|| panic!("Invalid line {c}")))
+        .map(|(c, l)| {
+            eyes::try_parse!(l, "{} {}", String, u8).unwrap_or_else(|| panic!("Invalid line {c}"))
+        })
         .for_each(|(cmd, step)| match cmd.chars().next() {
             Some('R') => rope.move_right(step),
             Some('U') => rope.move_up(step),
@@ -166,7 +175,8 @@ pub fn part_two(input: &str) -> Option<u32> {
             _ => unreachable!(),
         });
 
-    Some(rope.historic.len() as u32)
+    let uniq_pos: HashSet<Pos> = HashSet::from_iter(rope.historic);
+    Some(uniq_pos.len() as u32)
 }
 
 fn main() {
