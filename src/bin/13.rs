@@ -203,7 +203,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     });
 
     stream_list.sort_by(|a, b| token_cmp(&a.data, &b.data));
-    stream_list.iter().for_each(|token| println!("{}", token.to_string()));
+    stream_list.iter().for_each(|token| println!("{}", token));
 
     Some(stream_list.iter().enumerate().fold(1, |acc, (pos, tok)| {
         if tok == decode_key_1 || tok == decode_key_2 {
