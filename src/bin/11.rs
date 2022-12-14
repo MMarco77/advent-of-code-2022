@@ -35,6 +35,7 @@ impl From<&str> for Operation {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct Monkey {
     items: Vec<u32>,
     operation: Operation,
@@ -59,16 +60,16 @@ impl Monkey {
                 2 => operation = Operation::from(data),
                 3 => {
                     test_divider = eyes::try_parse!(data.trim(), "Test: divisible by {}", u8)
-                        .expect(&format!("Invalid test {}", data))
+                        .unwrap_or_else(|| panic!("Invalid test {}", data))
                 }
                 4 => {
                     test_true_dst = eyes::try_parse!(data.trim(), "If true: throw to monkey {}", u8)
-                        .expect(&format!("Invalid test {}", data))
+                        .unwrap_or_else(|| panic!("Invalid true test case {}", data))
                 }
                 5 => {
                     test_false_dst =
                         eyes::try_parse!(data.trim(), "If false: throw to monkey {}", u8)
-                            .expect(&format!("Invalid false test case {}", data))
+                            .unwrap_or_else(|| panic!("Invalid false test case {}", data))
                 }
                 6 => {}
                 _ => unreachable!("Invalid Monkey description {}", line),
@@ -84,21 +85,19 @@ impl Monkey {
 
     fn items_from_str(line: &str) -> Vec<u32> {
         let list_str = eyes::try_parse!(line.trim(), "Starting items: {}", String)
-            .expect(&format!("Invalid items {}", line));
+            .unwrap_or_else(|| panic!("Invalid items {}", line));
         list_str
-            .split(",")
+            .split(',')
             .map(|v| -> u32 {
                 v.trim()
                     .parse::<u32>()
-                    .expect(&format!("Invalid item value '{}'", v))
+                    .unwrap_or_else(|_| panic!("Invalid item value '{}'", v))
             })
             .collect::<Vec<_>>()
     }
 }
 
-fn process_round(_monkeys: &mut Vec<Monkey>) -> AppResult<()> {
-    
-
+fn process_round(_monkeys: &mut [Monkey]) -> AppResult<()> {
     Ok(())
 }
 
