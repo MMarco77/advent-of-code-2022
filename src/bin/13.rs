@@ -13,7 +13,7 @@ fn is_right_order(left: &str, right: &str) -> Option<u32> {
             }
             (Some(a), Some(b)) if a.is_numeric() && b.is_numeric() => {
                 let mut left_nbr = format!("{a}");
-                while let Some(c) = left_iter.next() {
+                for c in left_iter.by_ref() {
                     if c.is_numeric() {
                         left_nbr += &c.to_string();
                     } else {
@@ -23,7 +23,7 @@ fn is_right_order(left: &str, right: &str) -> Option<u32> {
                 }
 
                 let mut right_nbr = format!("{b}");
-                while let Some(c) = right_iter.next() {
+                for c in right_iter.by_ref() {
                     if c.is_numeric() {
                         right_nbr += &c.to_string();
                     } else {
@@ -34,20 +34,21 @@ fn is_right_order(left: &str, right: &str) -> Option<u32> {
 
                 let lnbr = left_nbr
                     .parse::<u8>()
-                    .expect(&format!("Waitng for data '{}'", left));
+                    .unwrap_or_else(|_| panic!("Waitng for data '{}'", left));
                 let rnbr = right_nbr
                     .parse::<u8>()
-                    .expect(&format!("Waitng for data '{}'", right));
+                    .unwrap_or_else(|_| panic!("Waitng for data '{}'", right));
                 if lnbr > rnbr {
                     return Some(0);
-                } else if rnbr > lnbr {
+                }
+                if rnbr > lnbr {
                     return Some(1);
                 }
             }
             // Solo nbr to array
             (Some(a), Some('[')) if a.is_numeric() => {
                 let mut new_left = format!("[{a}");
-                while let Some(c) = left_iter.next() {
+                for c in left_iter.by_ref() {
                     if c.is_numeric() {
                         new_left += &c.to_string();
                     } else {
@@ -58,7 +59,7 @@ fn is_right_order(left: &str, right: &str) -> Option<u32> {
                 new_left += "]";
 
                 let mut new_right = "[".to_owned();
-                while let Some(c) = right_iter.next() {
+                for c in right_iter.by_ref() {
                     new_right += &c.to_string();
                     if c == ']' {
                         break;
@@ -71,7 +72,7 @@ fn is_right_order(left: &str, right: &str) -> Option<u32> {
             }
             (Some('['), Some(b)) if b.is_numeric() => {
                 let mut new_right = format!("[{b}");
-                while let Some(c) = right_iter.next() {
+                for c in right_iter.by_ref() {
                     if c.is_numeric() {
                         new_right += &c.to_string();
                     } else {
@@ -83,7 +84,7 @@ fn is_right_order(left: &str, right: &str) -> Option<u32> {
 
                 let mut new_left = "[".to_owned();
                 let mut sub_par = 0_u8;
-                while let Some(c) = left_iter.next() {
+                for c in left_iter.by_ref() {
                     new_left += &c.to_string();
                     if c == ']' && sub_par == 0 {
                         break;
@@ -116,7 +117,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut accu = 0_u32;
     let mut idx = 1_u32;
     for chunk in &input.lines().chunks(3) {
-        let mut pair_iter = chunk.into_iter();
+        let mut pair_iter = chunk;
         let left = pair_iter.next().expect("Missing left value");
         let right = pair_iter.next().expect("Missing right value");
 
