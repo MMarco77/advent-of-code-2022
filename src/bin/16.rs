@@ -1,59 +1,68 @@
-use std::collections::HashSet;
-
-use petgraph::{
-    algo,
-    dot::{Config, Dot},
-    prelude::DiGraph,
-    Graph, adj::NodeIndex,
+use std::{
+    arch::x86_64::_MM_EXCEPT_INEXACT,
+    collections::{HashMap, HashSet},
+    mem::replace,
 };
 
+use petgraph::{algo, dot::Dot, prelude::DiGraph};
+
+fn get_graph(input: &str) -> Option<DiGraph<u8, u8>> {
+    let mut node_label: HashMap<String, petgraph::prelude::NodeIndex> = HashMap::new();
+    let mut edge_list: Vec<(String, String)> = Vec::new();
+    let mut graph = DiGraph::<u8, u8>::new();
+    for new_node_desc in input.lines() {
+        let new_node_desc_2 = new_node_desc
+            .replace("tunnels", "tunnel")
+            .replace("valves", "valve")
+            .replace("leads", "lead");
+        let (new_node_name, weight, edges) = eyes::try_parse!(
+            &new_node_desc_2,
+            "Valve {} has flow rate={}; tunnel lead to valve {}",
+            String,
+            u8,
+            String
+        )
+        .expect(&format!("Invalid node description '{}'", new_node_desc_2));
+        let new_node = graph.add_node(weight);
+        node_label.insert(new_node_name.clone(), new_node);
+
+        // Add edge
+        edges.split(",").for_each(|other_node_name| {
+            edge_list.push((new_node_name.clone(), other_node_name.trim().to_string()))
+        });
+    }
+
+    // Create edge
+    for (from_node_name, to_node_name) in edge_list.iter() {
+        let from_node = node_label
+            .get(from_node_name)
+            .expect(&format!("Node {} is missing", from_node_name));
+        let to_node = node_label
+            .get(to_node_name)
+            .expect(&format!("Node {} is missing", to_node_name));
+        graph.add_edge(*from_node, *to_node, 1);
+    }
+
+    println!("{:?}", Dot::new(&graph));
+    Some(graph)
+}
+
 pub fn part_one(input: &str) -> Option<u32> {
-    let mut graph = DiGraph::<&str, u32>::new();
-
-    let AA = graph.add_node("AA");
-    let BB = graph.add_node("BB");
-    let CC = graph.add_node("CC");
-    let DD = graph.add_node("DD");
-    let EE = graph.add_node("EE");
-    let FF = graph.add_node("FF");
-    let GG = graph.add_node("GG");
-    let HH = graph.add_node("HH");
-    let II = graph.add_node("II");
-    let JJ = graph.add_node("JJ");
-
-    graph.extend_with_edges(&[
-        (AA, DD, 0),
-        (AA, II, 0),
-        (AA, BB, 0),
-        (BB, CC, 13),
-        (BB, AA, 13),
-        (CC, DD, 2),
-        (CC, BB, 2),
-        (DD, CC, 20),
-        (DD, AA, 20),
-        (DD, EE, 20),
-        (EE, FF, 3),
-        (EE, DD, 3),
-        (FF, EE, 0),
-        (FF, GG, 0),
-        (GG, FF, 0),
-        (GG, HH, 0),
-        (HH, GG, 22),
-        (II, AA, 0),
-        (II, JJ, 0),
-        (JJ, II, 21),
-    ]);
-    // println!("{:?}", Dot::with_config(&graph, &[Config::EdgeNoLabel]));
-    println!("{}", Dot::new(&graph));
-    let mut path_finder: HashSet<(u32, u32)> = HashSet::new();
+    let graph = get_graph(input).expect("Failed to create graph");
     for start in graph.node_indices() {
         println!("--- {:?} ---", start.index());
-        println!("{:?}", algo::dijkstra(&graph, start, None, |_| 1));
-        for (n_idx, weight) in algo::dijkstra(&graph, start, None, |_| 1) {
-            path_finder.insert((start.index() as u32, n_idx.index() as  u32));
+        let best_path = algo::dijkstra(&graph, start, None, |_| 1);
+        println!("{:?}", best_path);
+        let mut elapse_time = 0_u32;
+        let mut pressure = 0_u32;
+        for (n_idx, weight) in best_path {
+            elapse_time += weight;
+            pressure += *graph
+                .node_weight(n_idx)
+                .expect("Failed to find node weight") as u32;
         }
+        println!("elapse_time: {}; pressure: {}", elapse_time, pressure);
     }
-    println!("{:#?}", path_finder);
 
     Some(1651)
 }

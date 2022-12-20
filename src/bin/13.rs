@@ -33,14 +33,12 @@ struct Packets {
 
 impl fmt::Display for Packets {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut acc= String::new();
-        self.data.iter().for_each(|token| {
-            match token {
-                Token::OpenParenthesis(_) => acc += "[",
-                Token::CloseParenthesis(_) => acc += "]",
-                Token::Number(v) => acc += &format!("{}", v),
-                Token::Coma => acc += "]",
-            }
+        let mut acc = String::new();
+        self.data.iter().for_each(|token| match token {
+            Token::OpenParenthesis(_) => acc += "[",
+            Token::CloseParenthesis(_) => acc += "]",
+            Token::Number(v) => acc += &format!("{}", v),
+            Token::Coma => acc += "]",
         });
         f.write_str(acc.as_ref())
     }

@@ -100,8 +100,7 @@ impl Rope {
             Self::update(cur_head, cur_tail);
             cur_head = cur_tail;
         }
-        
-        
+
         self.historic
             .push(self.tail_list.iter().last().unwrap().clone());
     }
@@ -155,8 +154,8 @@ pub fn part_one(input: &str) -> Option<u32> {
             _ => unreachable!(),
         });
 
-        let uniq_pos: HashSet<Pos> = HashSet::from_iter(rope.historic);
-        Some(uniq_pos.len() as u32)
+    let uniq_pos: HashSet<Pos> = HashSet::from_iter(rope.historic);
+    Some(uniq_pos.len() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {

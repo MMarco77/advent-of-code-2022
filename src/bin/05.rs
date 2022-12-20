@@ -73,11 +73,16 @@ pub fn part_one(input: &str) -> Option<String> {
     lines_iter.for_each(|line| {
         let (count, src, dst) = eyes::try_parse!(line, "move {} from {} to {}", u8, u8, u8)
             .unwrap_or_else(|| panic!("Invalide cmd line '{line}'"));
-        let mut stack_path = pull_reverse(&mut supply_stacks[src as usize -1], count).unwrap();
-        push(&mut supply_stacks[dst as usize -1], &mut stack_path);
+        let mut stack_path = pull_reverse(&mut supply_stacks[src as usize - 1], count).unwrap();
+        push(&mut supply_stacks[dst as usize - 1], &mut stack_path);
     });
 
-    Some(String::from_iter(supply_stacks.iter().map(|s| s.last().unwrap()).collect::<Vec<_>>()))
+    Some(String::from_iter(
+        supply_stacks
+            .iter()
+            .map(|s| s.last().unwrap())
+            .collect::<Vec<_>>(),
+    ))
 }
 
 pub fn part_two(input: &str) -> Option<String> {
@@ -90,12 +95,17 @@ pub fn part_two(input: &str) -> Option<String> {
     // Parse order
     lines_iter.for_each(|line| {
         let (count, src, dst) = eyes::try_parse!(line, "move {} from {} to {}", u8, u8, u8)
-        .unwrap_or_else(|| panic!("Invalide cmd line '{line}'"));
-        let mut stack_path = pull(&mut supply_stacks[src as usize -1], count).unwrap();
-        push(&mut supply_stacks[dst as usize -1], &mut stack_path);
+            .unwrap_or_else(|| panic!("Invalide cmd line '{line}'"));
+        let mut stack_path = pull(&mut supply_stacks[src as usize - 1], count).unwrap();
+        push(&mut supply_stacks[dst as usize - 1], &mut stack_path);
     });
 
-    Some(String::from_iter(supply_stacks.iter().filter_map(|s| s.last()).collect::<Vec<_>>()))
+    Some(String::from_iter(
+        supply_stacks
+            .iter()
+            .filter_map(|s| s.last())
+            .collect::<Vec<_>>(),
+    ))
 }
 
 fn main() {

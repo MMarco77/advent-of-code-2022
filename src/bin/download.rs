@@ -141,7 +141,7 @@ fn main() {
             exit_with_status(1, &tmp_file_path_input, &tmp_file_path_desc);
         }
     }
-    
+
     match fs::copy(&tmp_file_path_desc, &statement_path) {
         Ok(_) => {
             println!("---");
