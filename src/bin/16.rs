@@ -1,10 +1,5 @@
-use std::{
-    arch::x86_64::_MM_EXCEPT_INEXACT,
-    collections::{HashMap, HashSet},
-    mem::replace,
-};
-
 use petgraph::{algo, dot::Dot, prelude::DiGraph};
+use std::collections::HashMap;
 
 fn get_graph(input: &str) -> Option<DiGraph<u8, u8>> {
     let mut node_label: HashMap<String, petgraph::prelude::NodeIndex> = HashMap::new();
@@ -22,12 +17,12 @@ fn get_graph(input: &str) -> Option<DiGraph<u8, u8>> {
             u8,
             String
         )
-        .expect(&format!("Invalid node description '{}'", new_node_desc_2));
+        .unwrap_or_else(|| panic!("Invalid node description '{}'", new_node_desc_2));
         let new_node = graph.add_node(weight);
         node_label.insert(new_node_name.clone(), new_node);
 
         // Add edge
-        edges.split(",").for_each(|other_node_name| {
+        edges.split(',').for_each(|other_node_name| {
             edge_list.push((new_node_name.clone(), other_node_name.trim().to_string()))
         });
     }
@@ -36,10 +31,10 @@ fn get_graph(input: &str) -> Option<DiGraph<u8, u8>> {
     for (from_node_name, to_node_name) in edge_list.iter() {
         let from_node = node_label
             .get(from_node_name)
-            .expect(&format!("Node {} is missing", from_node_name));
+            .unwrap_or_else(|| panic!("Node {} is missing", from_node_name));
         let to_node = node_label
             .get(to_node_name)
-            .expect(&format!("Node {} is missing", to_node_name));
+            .unwrap_or_else(|| panic!("Node {} is missing", to_node_name));
         graph.add_edge(*from_node, *to_node, 1);
     }
 
@@ -67,7 +62,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(1651)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_input: &str) -> Option<u32> {
     None
 }
 

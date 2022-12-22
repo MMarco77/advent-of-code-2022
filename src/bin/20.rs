@@ -1,7 +1,11 @@
 fn mixing(input: &str, decryption_key: i64, loop_count: u8) -> Option<i64> {
     let nums = input
         .lines()
-        .map(|l| decryption_key * l.parse::<i64>().expect(&format!("Invalid value '{}'", l)))
+        .map(|l| {
+            decryption_key
+                * l.parse::<i64>()
+                    .unwrap_or_else(|_| panic!("Invalid value '{}'", l))
+        })
         .collect::<Vec<_>>();
 
     // indexes into nums

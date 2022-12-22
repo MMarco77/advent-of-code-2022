@@ -20,7 +20,7 @@ impl Ord for Packet {
         match (self, other) {
             (Self::List(a), Self::List(b)) => a.cmp(b),
             (Self::List(a), Self::Num(b)) => a.cmp(&vec![Self::Num(*b)]),
-            (Self::Num(a), Self::List(b)) => vec![Self::Num(*a)].cmp(&b),
+            (Self::Num(a), Self::List(b)) => vec![Self::Num(*a)].cmp(b),
             (Self::Num(a), Self::Num(b)) => a.cmp(b),
         }
     }
