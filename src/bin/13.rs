@@ -5,212 +5,136 @@
 not solved.
  */
 
-use std::{cmp::Ordering, fmt};
+use std::cmp::Ordering;
 
 use itertools::Itertools;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-enum Token {
-    OpenParenthesis(u8),
-    CloseParenthesis(u8),
-    Number(u8),
-    Coma,
+#[derive(Debug, PartialEq, Clone, Eq)]
+enum Packet {
+    Num(u8),
+    List(Vec<Packet>),
 }
 
-fn token_eq_not_num(a: &Token, b: &Token) -> bool {
-    matches!(
-        (a, b),
-        (&Token::OpenParenthesis(..), &Token::OpenParenthesis(..))
-            | (&Token::CloseParenthesis(..), &Token::CloseParenthesis(..))
-            | (&Token::Coma, &Token::Coma)
+impl Ord for Packet {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match (self, other) {
+            (Self::List(a), Self::List(b)) => a.cmp(b),
+            (Self::List(a), Self::Num(b)) => a.cmp(&vec![Self::Num(*b)]),
+            (Self::Num(a), Self::List(b)) => vec![Self::Num(*a)].cmp(&b),
+            (Self::Num(a), Self::Num(b)) => a.cmp(b),
+        }
+    }
+}
+
+impl PartialOrd for Packet {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn parse(input: &str) -> Vec<[Packet; 2]> {
+    input
+        .split("\n\n")
+        .map(|pair| {
+            let mut lines = pair.lines();
+            let left = lines.next().unwrap();
+            let right = lines.next().unwrap();
+
+            [parse_packet(left), parse_packet(right)]
+        })
+        .collect()
+}
+
+fn parse_packet(s: &str) -> Packet {
+    let chars: Vec<_> = s.chars().collect();
+    // parse_list returns the first parsed packet and the rest of the input
+    // the rest of the input will be empty when it is done
+    let (packet, _) = parse_list(&chars);
+    packet
+}
+
+fn parse_num(list: &[char]) -> (Packet, &[char]) {
+    // find the index where the first number ends
+    let mut i = 0;
+    while i < list.len() && list[i].is_ascii_digit() {
+        i += 1;
+    }
+
+    // parse the number
+    // uses math to concatenate numbers instead of turning them into a string first to parse that
+    let mut num = 0;
+    let mut offset = 1;
+    for c in list[..i].iter().rev() {
+        num += (*c as u8 - b'0') * offset;
+        offset *= 10;
+    }
+
+    // return the number and the rest of the packet
+    (Packet::Num(num), &list[i..])
+}
+
+fn parse_list(list: &[char]) -> (Packet, &[char]) {
+    // start by removing the starting [ of the passed in list
+    // at the end of this function, we remove the ending ] of the passed in list
+    let mut list = &list[1..];
+    let mut packets = Vec::new();
+
+    loop {
+        match list[0] {
+            // list ended, break the loop
+            ']' => break,
+            // skip over ,
+            ',' => list = &list[1..],
+            // beginning of new list, time for recursion to parse the inner list
+            '[' => {
+                let (packet, rest) = parse_list(list);
+                packets.push(packet);
+                list = rest;
+            }
+            // beginning of a number
+            _ => {
+                let (n, rest) = parse_num(list);
+                packets.push(n);
+                list = rest;
+            }
+        }
+    }
+
+    // return the parsed list and the remaining characters minus the ] that terminates the list this just parsed
+    (Packet::List(packets), &list[1..])
+}
+
+pub fn part_one(input: &str) -> Option<usize> {
+    let pairs = parse(input);
+
+    Some(
+        pairs
+            .iter()
+            .positions(|[left, right]| left < right)
+            .map(|idx| idx + 1)
+            .sum(),
     )
 }
 
-#[derive(Debug, PartialEq, Clone)]
-struct Packets {
-    pub data: Vec<Token>,
-}
+pub fn part_two(input: &str) -> Option<usize> {
+    let pairs = parse(input);
+    let mut packets: Vec<_> = pairs.iter().flatten().collect();
 
-impl fmt::Display for Packets {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut acc = String::new();
-        self.data.iter().for_each(|token| match token {
-            Token::OpenParenthesis(_) => acc += "[",
-            Token::CloseParenthesis(_) => acc += "]",
-            Token::Number(v) => acc += &format!("{}", v),
-            Token::Coma => acc += "]",
-        });
-        f.write_str(acc.as_ref())
-    }
-}
+    let divider_1 = parse_packet("[[2]]");
+    let divider_2 = parse_packet("[[6]]");
 
-impl From<&str> for Packets {
-    fn from(value: &str) -> Self {
-        let mut res: Vec<Token> = Vec::new();
-        let mut acc: String = String::new();
-        let mut level: u8 = 0;
-        value.chars().for_each(|c| match c {
-            '[' => {
-                if !acc.is_empty() {
-                    res.push(Token::Number(acc.parse::<u8>().unwrap()));
-                    acc.clear();
-                }
-                res.push(Token::OpenParenthesis({
-                    let tmp = level;
-                    level += 1;
-                    tmp
-                }));
-            }
-            ']' => {
-                if !acc.is_empty() {
-                    res.push(Token::Number(acc.parse::<u8>().unwrap()));
+    packets.push(&divider_1);
+    packets.push(&divider_2);
 
-                    acc.clear();
-                }
-                res.push(Token::CloseParenthesis({
-                    level -= 1;
-                    level
-                }));
-            }
-            ',' => {
-                if !acc.is_empty() {
-                    res.push(Token::Number(acc.parse::<u8>().unwrap()));
+    packets.sort_unstable();
 
-                    acc.clear();
-                }
-                res.push(Token::Coma);
-            }
-            d if d.is_numeric() => acc += &d.to_string(),
-            _ => unreachable!(),
-        });
-        if !acc.is_empty() {
-            panic!("Invalid format")
-        };
-
-        Self { data: res }
-    }
-}
-
-fn token_cmp(left: &[Token], right: &[Token]) -> Ordering {
-    let mut left_iter = left.iter();
-    let mut right_iter = right.iter();
-    let mut left_tok = left_iter.next();
-    let mut right_tok = right_iter.next();
-    loop {
-        match (left_tok, right_tok) {
-            (Some(l), Some(r)) if token_eq_not_num(l, r) => {
-                left_tok = left_iter.next();
-                right_tok = right_iter.next();
-            }
-            (Some(Token::Number(l)), Some(Token::Number(r))) => {
-                if l > r {
-                    return Ordering::Greater;
-                }
-                if r > l {
-                    return Ordering::Less;
-                }
-                left_tok = left_iter.next();
-                right_tok = right_iter.next();
-            }
-            (Some(Token::OpenParenthesis(lvl)), Some(Token::Number(v))) => {
-                let mut new_left: Vec<Token> = vec![Token::OpenParenthesis(*lvl)];
-                for tok in left_iter.by_ref() {
-                    new_left.push(tok.clone());
-                    if matches!(tok, &Token::CloseParenthesis(l) if l == *lvl) {
-                        break;
-                    }
-                }
-
-                let new_right: Vec<Token> = vec![
-                    Token::OpenParenthesis(0),
-                    Token::Number(*v),
-                    Token::CloseParenthesis(0),
-                ];
-                let res = token_cmp(&new_left, &new_right);
-                match res {
-                    Ordering::Less | Ordering::Greater => return res,
-                    Ordering::Equal => {}
-                }
-                left_tok = left_iter.next();
-                right_tok = right_iter.next();
-            }
-            (Some(Token::Number(v)), Some(Token::OpenParenthesis(lvl))) => {
-                let new_left: Vec<Token> = vec![
-                    Token::OpenParenthesis(0),
-                    Token::Number(*v),
-                    Token::CloseParenthesis(0),
-                ];
-
-                let mut new_right: Vec<Token> = vec![Token::OpenParenthesis(*lvl)];
-                for tok in right_iter.by_ref() {
-                    new_right.push(tok.clone());
-                    if matches!(tok, &Token::CloseParenthesis(l) if l == *lvl) {
-                        break;
-                    }
-                }
-
-                let res = token_cmp(&new_left, &new_right);
-                match res {
-                    Ordering::Less | Ordering::Greater => return res,
-                    Ordering::Equal => {}
-                }
-                left_tok = left_iter.next();
-                right_tok = right_iter.next();
-            }
-            // Close array first
-            (Some(_), Some(Token::CloseParenthesis(..))) => return Ordering::Greater,
-            (Some(Token::CloseParenthesis(..)), Some(_)) => return Ordering::Less,
-            // Too short
-            (None, None) => return Ordering::Equal,
-            (None, Some(_)) => return Ordering::Less,
-            (Some(_), None) => return Ordering::Greater,
-            (Some(l), Some(r)) => unreachable!("Not data => '{:#?}' '{:#?}'", l, r),
-        }
-    }
-}
-
-pub fn part_one(input: &str) -> Option<u32> {
-    let mut packets_counter = 1_u32;
-    let mut res = 0_u32;
-    for chunk in &input.lines().chunks(3) {
-        let mut iter_line = chunk;
-        let line = iter_line.next().expect("Left packet is missing");
-        let left = Packets::from(line);
-        // println!("{} => {:#?}", line, left);
-
-        let line = iter_line.next().expect("Right packet is missing");
-        let right = Packets::from(line);
-        // println!("{} => {:#?}", line, right);
-
-        if let Ordering::Less = token_cmp(&left.data, &right.data) {
-            res += packets_counter;
-        }
-        packets_counter += 1;
-    }
-    Some(res)
-}
-
-pub fn part_two(input: &str) -> Option<u32> {
-    let decode_key_1 = &Packets::from("[[2]]");
-    let decode_key_2 = &Packets::from("[[6]]");
-    let mut stream_list: Vec<Packets> = vec![decode_key_1.clone(), decode_key_2.clone()];
-    input.lines().for_each(|line| {
-        if !line.is_empty() {
-            stream_list.push(Packets::from(line));
-        }
-    });
-
-    stream_list.sort_by(|a, b| token_cmp(&a.data, &b.data));
-    // stream_list.iter().for_each(|token| println!("{}", token));
-
-    // Some(stream_list.iter().enumerate().fold(1, |acc, (pos, tok)| {
-    //     if tok == decode_key_1 || tok == decode_key_2 {
-    //         acc * (pos as u32 + 1)
-    //     } else {
-    //         acc
-    //     }
-    // }))
-    None
+    Some(
+        packets
+            .into_iter()
+            .positions(|packet| packet == &divider_1 || packet == &divider_2)
+            .map(|idx| idx + 1)
+            .product(),
+    )
 }
 
 fn main() {
@@ -232,7 +156,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 13);
-        //assert_eq!(part_two(&input), Some(140));
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(140));
     }
 }
