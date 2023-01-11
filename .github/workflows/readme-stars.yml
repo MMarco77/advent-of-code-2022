@@ -1,9 +1,12 @@
 name: Update readme ⭐️ progress
 
 on:
-    schedule:
-        - cron: "51 */4 * * *" # Every 4 hours
-    workflow_dispatch:
+    #schedule:
+    #    - cron: "51 */4 * * *" # Every 4 hours
+    #workflow_dispatch:
+  push:
+    branches:
+      - master
 
 jobs:
     update-readme:
